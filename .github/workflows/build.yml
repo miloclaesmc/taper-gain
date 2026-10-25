@@ -1,0 +1,22 @@
+name: Build Taper Gain
+on:
+  workflow_dispatch:
+  push:
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -G Xcode
+      - name: Build
+        run: cmake --build build --config Release
+      - name: Sign and zip
+        run: |
+          COMP="build/TaperGain_artefacts/Release/AU/Taper Gain.component"
+          codesign --force --deep -s - "$COMP"
+          ditto -c -k --keepParent "$COMP" TaperGain-AU.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TaperGain-AU
+          path: TaperGain-AU.zip
